@@ -215,14 +215,16 @@
             cell2.setAttribute("colspan", 3)
             cell2.setAttribute("id", "incorrectAnswerCell")
             for (item of incorrect){
-                cell2.innerHTML+='<div class="input-group">'+
-                            '<div class="input-group-prepend">'+
-                                '<div class="input-group-text">'+
-                                '<input type="radio" aria-label="Radio button for following text input">'+
+                if (item != ""){
+                    cell2.innerHTML+='<div class="input-group">'+
+                                '<div class="input-group-prepend">'+
+                                    '<div class="input-group-text">'+
+                                    '<input type="radio" aria-label="Radio button for following text input">'+
+                                    '</div>'+
                                 '</div>'+
-                            '</div>'+
-                        '<input type="text" name="incorrect" value="'+item+'"  class="form-control" aria-label="Text input with radio button">'+
-                        '</div>';
+                            '<input type="text" name="incorrect" value="'+item+'"  class="form-control" aria-label="Text input with radio button">'+
+                            '</div>';
+                }
             }
 
             rowElem = tableElem.insertRow(3);
@@ -279,6 +281,7 @@
                 contentType: "application/json; charset=utf-8",
                 success:function(result){
                     console.log(result)
+                    window.location.reload();
 
                 },
                 error:function(xhr,status,error){
