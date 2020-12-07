@@ -1,10 +1,10 @@
 from flask import Flask, url_for, request, abort, redirect, jsonify, session, render_template, url_for
 from quizDAO import quizDAO
-import re
+import re #regular expression module.
 app = Flask(__name__, template_folder='static')
 app.secret_key= 'somesecretkeyadaf23'
 
-
+#Home route, redirects to login if no session found.
 @app.route('/')
 def home():
     if 'loggedin' in session:
@@ -13,6 +13,7 @@ def home():
     
     return redirect(url_for('login'))
 
+#Login screen, if a username and password are received via request and if they exist login. Sets session username and id.
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     msg = ""
@@ -32,6 +33,7 @@ def login():
 
     return render_template('index.html', msg=msg)
 
+#Logout, clears session variables, redirects to login screen
 @app.route('/logout')
 def logout():
     session.pop('loggedin', None)
@@ -40,6 +42,8 @@ def logout():
 
     return redirect(url_for('login'))
 
+#Register screen, if a request is received, the user already doesnt exist and the field were filled correctly
+#the user details are passed to the createUser DAO function.
 @app.route('/register', methods=['GET', 'POST'])
 def register():
 
@@ -69,15 +73,14 @@ def register():
 
     return render_template('register.html', msg=msg)
 
+#Play Quiz screen
 @app.route('/play')
 def play():
-    qCount = quizDAO.getQuestionIds()
-    msg = [i[0] for i in qCount]
-
     if 'loggedin' in session:
 
-            return render_template('playQuiz.html', username=session['username'], msg=msg,)
+            return render_template('play.html', username=session['username'])
 
+#Third party api page
 @app.route('/OpenTrivaQuiz')
 def thirdpartyquiz():
 
@@ -87,16 +90,28 @@ def thirdpartyquiz():
     
     return redirect(url_for('login'))
 
+#create a question page
 @app.route('/createquestion')
 def createQuestion():
 
     if 'loggedin' in session:
 
-        return render_template('createquestion.html', username=session['username'])
+        return render_template('create.html', username=session['username'])
     
     return redirect(url_for('login'))
 
 
+@app.route('/browse')
+def browseQuestions():
+
+    if 'loggedin' in session:
+
+        return render_template('browse.html', username=session['username'])
+    
+    return redirect(url_for('login'))
+
+
+#api curl functions
 @app.route('/questions')
 def getAll():
     return jsonify(quizDAO.getAll())
@@ -105,6 +120,9 @@ def getAll():
 def findById(id):
     return jsonify(quizDAO.findById(id))
 
+@app.route('/questions/random')
+def random():
+    return jsonify(quizDAO.findRandom())
 
 @app.route('/questions', methods=['POST'])
 def create():
@@ -129,16 +147,6 @@ def create():
     }
     return jsonify(quizDAO.create(question))
 
-@app.route('/browse')
-def browseQuestions():
-
-    if 'loggedin' in session:
-
-        return render_template('browse.html', username=session['username'])
-    
-    return redirect(url_for('login'))
-
-
 
 @app.route('/questions/<int:id>', methods=['PUT'])
 def update(id):
@@ -161,6 +169,7 @@ def update(id):
     if 'difficulty' in reqJson:
        foundQuestion['difficulty'] = reqJson['difficulty']
 
+    #if incorrect_answers exist and are not blank...
     if 'incorrect_answers' in reqJson:
         for item in request.json["incorrect_answers"]:
             if item != "":
@@ -190,5 +199,4 @@ def delete(id):
     return jsonify({"done":True})
 
 if __name__ == "__main__":
-    print("in if")
     app.run(debug=True) #allows for realtime editing

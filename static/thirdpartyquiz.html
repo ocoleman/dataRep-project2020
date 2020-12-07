@@ -1,22 +1,21 @@
 <html>
     <head>
-        <title>Test</title>
-
+        <title>OpenTriviaDB Quiz</title>
+        <!-- jQuery library -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-            
+        <!-- Bootstrap -->    
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
         
     </head>
 
 
     <body style="background-color: #dce2eb; ">
-        
+        <!-- Navbar adapted from https://getbootstrap.com/ -->     
         <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #5e7aaf;">
-            <a class="navbar-brand" style="color: white" href="#">Quiz Game</a>
+            <a class="navbar-brand" style="color: white" href="{{ url_for('home') }}">Quiz Game</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
               <span class="navbar-toggler-icon"></span>
             </button>
-          
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
               <ul class="navbar-nav mr-auto" style="color: white">
                 <li class="nav-item active">
@@ -42,17 +41,17 @@
           </nav>
 
 
-        
+        <!-- 'header' divs, back button, score etc. Some initially hidden -->
         <div id="menuBack" style=" margin: 15px 15px 15px 15px; ">
             <a class="btn btn-danger" href="{{ url_for('home') }}" role="button">Go Back</a>
         </div>
 
         <div id="score" style="display: none; width: 200px; margin: 15px 15px 15px 15px; border: solid; border-color: #5e7aaf;; border-radius: 25px; padding: 10px; ">
         </div>
-
+        <!-- Quiz Options form, allows user to select options for generated quiz -->
         <div id="quizMenu" style="width: 1000px; margin: 15px 15px 15px 15px; display: block;">
             <form name="quizOptions" onsubmit="validate(); return false;">
-                <h1>Welcome, {{ username }}</h1>
+                <h1>OpenTriviaDB Quiz</h1>
                 <h2 class="form-signin-heading">Select Quiz Options: </h2>
         
                 <label for="trivia_amount">Number of Questions:</label>
@@ -99,7 +98,7 @@
             </form>
 
         </div>
-
+        <!-- Quizes position div, generated later by javascript -->   
         <div id="quizPosition" style="width: 1200px; margin: 15px 15px 15px 15px; display: none;" class="table-responsive">
             <table id="quizTable" class="table table-bordered table-secondary">
             

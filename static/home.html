@@ -1,13 +1,15 @@
 <html>
     <head>
         <title>Home</title>
+        <!-- jQuery library -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-            
+        <!-- Bootstrap -->   
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     </head>
     <body style="background-color: #dce2eb; ">
+        <!-- Navbar adapted from https://getbootstrap.com/ -->
         <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #5e7aaf;">
-            <a class="navbar-brand" style="color: white" href="#">Quiz Game</a>
+            <a class="navbar-brand" style="color: white" href="{{ url_for('home') }}">Quiz Game</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
               <span class="navbar-toggler-icon"></span>
             </button>
@@ -36,9 +38,11 @@
             </div>
           </nav>
         <div style="margin: 15px 15px 15px 15px;">
+          <!-- Session username from flask -->
           <h1>Welcome back, {{ username }}!</h1>
         </div>
-        <br><br>
+        <br><br> 
+        <!-- Panel screen adapted from https://getbootstrap.com/ -->
         <div class="container">
             <!-- Example row of columns -->
             <div class="row">
@@ -61,7 +65,7 @@
               <div class="col">
                 <h2>OpenTriviaDB Quiz</h2>
                 <p>Play a quiz with questions retrieved from the The Open Trivia Database.</p>
-                <p><a class="btn btn-primary" href="{{ url_for('thirdpartyquiz') }}" role="button">OpenTriviaDB &raquo;</a></p>
+                <p><a class="btn btn-primary" href="{{ url_for('thirdpartyquiz') }}" role="button">Take Quiz &raquo;</a></p>
               </div>
             </div>
     

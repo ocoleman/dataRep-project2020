@@ -1,18 +1,16 @@
 <html>
     <head>
         <title>Play Quiz</title>
-
+        <!-- jQuery library -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-            
+        <!-- Bootstrap -->    
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
         
     </head>
-
-
     <body style="background-color: #dce2eb; ">
-        
+        <!-- Navbar adapted from https://getbootstrap.com/ -->
         <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #5e7aaf;">
-            <a class="navbar-brand" style="color: white" href="#">Quiz Game</a>
+            <a class="navbar-brand" style="color: white" href="{{ url_for('home') }}">Quiz Game</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
               <span class="navbar-toggler-icon"></span>
             </button>
@@ -41,7 +39,7 @@
             </div>
           </nav>
 
-
+        <!-- 'header' divs, back button, score etc. Some initially hidden -->
         <div id="goBack" style="display: none; margin: 15px 15px 15px 15px; ">
             <button type="button" class="btn btn-danger" onClick="window.location.reload();">Go Back</button>
         </div>
@@ -52,13 +50,15 @@
         <div id="score" style="display: none; width: 200px; margin: 15px 15px 15px 15px; border: solid; border-color: #5e7aaf; border-radius: 25px; padding: 10px; ">
         </div>
 
+        <div id="errorTag"></div>
+
+        <!-- Quizes position div, generated later by javascript -->   
         <div id="quizPosition" style="width: 1200px; margin: 15px 15px 15px 15px; display: none;" class="table-responsive">
             <table id="quizTable" class="table table-bordered table-secondary">
             
             </table>
 
         </div>
-
         <div id="submitQuiz" style="display: none; margin: -30px 15px 15px 15px; ">
             <button type="button" class="btn btn-primary" onClick="checkUserAnswer()">Finish</button>
         </div>
@@ -75,39 +75,30 @@
         //Global correctAnswerList stores correct answer of each question.
         var correctAnswerList = [];
 
-        //list of ids taken from flask, used to get various questions.
-        //the list is shuffled and a maximum of 10 are then passed to the ajax function.
-        var ids = [].concat({{ msg }});
-        ids.sort(function(){
-            return 0.5 - Math.random();
-        });
-        if (ids.length > 10) ids = ids.slice(0, 10);
-    
-        function readJSON(ids){
+
+        function readJSON(){
             //quiz table and finish button become visible.
             document.getElementById('quizPosition').style.display = "block";
             document.getElementById('submitQuiz').style.display = "block";
-            for (id of ids){
-                $.ajax({
-                    url:host+'/questions/'+id,
-                    method:'GET',
-                    datatype:'JSON',
-                    success:function(results){
-                        console.log("results",results)
-                        //correct answer of each question passed to correctAnswerList
-                        correctAnswerList.push(results.correct_answer);
-                        //Table generator passed each question.
-                        showQuestion(results);
 
-                    },
-                    error:function (xhr,status,error){
-                        console.log ("error "+error +" code:"+status)
+            $.ajax({
+                url:host+'/questions/random',
+                method:'GET',
+                datatype:'JSON',
+                success:function(results){
+                    console.log("results",results)
+                    for (question of results){
+                        //correct answer of each question passed to correctAnswerList
+                        correctAnswerList.push(question.correct_answer);
+                        //Table generator passed each question.
+                        showQuestion(question);
                     }
 
-                });
-            }
-
-
+                },
+                error:function (xhr,status,error){
+                    console.log ("error "+error +" code:"+status)
+                }
+            });
         }
 
         //Function to generate a table, with rows containing various input fields.
@@ -172,9 +163,18 @@
         
         //Function for checking the values selected by the user
         function checkUserAnswer(){
+            document.getElementById("errorTag").innerHTML = "";
             for (id of ids){
                 choice=document.querySelector('input[name="'+id+'"]:checked');
                 allchoices=document.getElementsByName(id);
+                if((choice == null) || (allchoices == null)){
+                    errormsg = document.getElementById("errorTag")
+                    errormsg.setAttribute("style","color:red; margin: 15px 15px 15px 15px; ")
+                    errormsg.innerHTML="Error: One or more questions were not answered."
+                    document.body.scrollTop = 0;
+                    document.documentElement.scrollTop = 0;
+                    return;
+                }
                 check(choice,allchoices);
                 //call of showScore()
                 showScore(ids);
@@ -206,9 +206,9 @@
         }
 
         //Displays the gotten score at the top of the page.
-        function showScore(ids){
+        function showScore(){
             document.getElementById('score').style.display = "block";
-            document.getElementById('score').innerHTML="<h3> You got "+score+"/"+ids.length+"</h3>"
+            document.getElementById('score').innerHTML="<h3> You got "+score+"/"+correctAnswerList.length+"</h3>"
             document.getElementById('submitQuiz').style.display = "none";
             document.body.scrollTop = 0;
             document.documentElement.scrollTop = 0;
@@ -217,7 +217,7 @@
 
 
         //function called on page load. 
-        readJSON(ids);
+        readJSON();
 
     </script>
 <html>
