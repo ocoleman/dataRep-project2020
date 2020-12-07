@@ -126,7 +126,7 @@
 
         function editQuestion(id){
             $.ajax({
-                url:'http://127.0.0.1:5000/questions/'+id,
+                url:host+'/questions/'+id,
                 method:'GET',
                 datatype:'JSON',
                 success:function(results){
@@ -168,7 +168,7 @@
                     '</select>';
 
             var typeHTML = '<select id="type"  class="form-control">'+
-                        '<option value="previous">'+question.difficulty+'</option>'+
+                        '<option value="previous">'+question.type+'</option>'+
                         '<option value="any">Any Type</option>'+
                         '<option value="multiple">Multiple Choice</option>'+
                         '<option value="boolean">True / False</option>'+
