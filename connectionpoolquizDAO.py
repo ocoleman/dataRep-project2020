@@ -9,13 +9,18 @@ class QuizDAO:
             password=   cfg.mysql['password'],
             database=   cfg.mysql['database'],
             pool_name='my_connection_pool',
-            pool_size=2,
+            pool_size=10,
         )
         return db
 
     def getConnection(self):
         db = mysql.connector.connect(
-            pool_name='my_connection_pool'
+            host=       cfg.mysql['host'],
+            user=       cfg.mysql['user'],
+            password=   cfg.mysql['password'],
+            database=   cfg.mysql['database'],
+            pool_name='my_connection_pool',
+            pool_size=10,
         )
         return db
 
