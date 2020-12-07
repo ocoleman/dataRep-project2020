@@ -1,0 +1,296 @@
+<html>
+    <head>
+        <title>Test</title>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+            
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        
+    </head>
+
+
+    <body style="background-color: #dce2eb; ">
+        
+        <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #5e7aaf;">
+            <a class="navbar-brand" style="color: white" href="#">Quiz Game</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+          
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav mr-auto" style="color: white">
+                <li class="nav-item active">
+                  <a class="nav-link" style="color: white" href="{{ url_for('home') }}">Home </a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" style="color: white" href="{{ url_for('play') }}">Play </a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" style="color: white" href="{{ url_for('createQuestion') }}">Create  </a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" style="color: white" href="{{ url_for('browseQuestions') }}">Browse All </a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" style="color: white" href="{{ url_for('thirdpartyquiz') }}">OpenTriviaDB </a>
+                </li>  
+              </ul>
+            <form class="form-inline my-2 my-lg-0">
+                <a href="{{ url_for('logout') }}" class="btn btn-danger active" role="button" aria-pressed="true">Logout</a>
+            </form>
+            </div>
+          </nav>
+
+
+        
+        <div id="menuBack" style=" margin: 15px 15px 15px 15px; ">
+            <a class="btn btn-danger" href="{{ url_for('home') }}" role="button">Go Back</a>
+        </div>
+
+        <div id="score" style="display: none; width: 200px; margin: 15px 15px 15px 15px; border: solid; border-color: #5e7aaf;; border-radius: 25px; padding: 10px; ">
+        </div>
+
+        <div id="quizMenu" style="width: 1000px; margin: 15px 15px 15px 15px; display: block;">
+            <form name="quizOptions" onsubmit="validate(); return false;">
+                <h1>Welcome, {{ username }}</h1>
+                <h2 class="form-signin-heading">Select Quiz Options: </h2>
+        
+                <label for="trivia_amount">Number of Questions:</label>
+                <input type="number" name="trivia_amount" id="trivia_amount" class="form-control" min="1" max="10" value="10">
+        
+                <br>
+        
+                <label for="trivia_category">Select Category: </label>
+                <select name="trivia_category" class="form-control">
+                    <option value="any">Any Category</option>
+                    <option value="9">General Knowledge</option><option value="10">Entertainment: Books</option><option value="11">Entertainment: Film</option>
+                    <option value="12">Entertainment: Music</option><option value="13">Entertainment: Musicals &amp; Theatres</option><option value="14">Entertainment: Television</option>
+                    <option value="15">Entertainment: Video Games</option><option value="16">Entertainment: Board Games</option><option value="17">Science &amp; Nature</option>
+                    <option value="18">Science: Computers</option><option value="19">Science: Mathematics</option><option value="20">Mythology</option><option value="21">Sports</option>
+                    <option value="22">Geography</option><option value="23">History</option><option value="24">Politics</option><option value="25">Art</option>
+                    <option value="26">Celebrities</option><option value="27">Animals</option><option value="28">Vehicles</option><option value="29">Entertainment: Comics</option>
+                    <option value="30">Science: Gadgets</option><option value="31">Entertainment: Japanese Anime &amp; Manga</option>
+                    <option value="32">Entertainment: Cartoon &amp; Animations</option>		
+                </select>
+        
+                <br>
+        
+                <label for="trivia_difficulty">Select Difficulty: </label>
+                <select name="trivia_difficulty" class="form-control">
+                    <option value="any">Any Difficulty</option>
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+        
+                <br>
+        
+                <label for="trivia_type">Select Type: </label>
+                <select name="trivia_type" class="form-control">>
+                    <option value="any">Any Type</option>
+                    <option value="multiple">Multiple Choice</option>
+                    <option value="boolean">True / False</option>
+                </select>
+        
+                <br>
+                
+                <button style="width: 30%; " class="btn btn-lg btn-primary btn-block" type="submit" onclick="displayQuiz()" >Take Quiz</button>
+                
+            </form>
+
+        </div>
+
+        <div id="quizPosition" style="width: 1200px; margin: 15px 15px 15px 15px; display: none;" class="table-responsive">
+            <table id="quizTable" class="table table-bordered table-secondary">
+            
+            </table>
+
+        </div>
+        <div id="submitQuiz" style="display: none; margin: -15px 15px 15px 15px; ">
+            <button type="button" class="btn btn-primary" onClick="checkUserAnswer()">Finish</button>
+        </div>
+    </div>
+
+    </body>
+
+    <script>
+        //Global variables
+        var data = "";
+        var qNumber = 0;
+        var optionID = 100;
+        var globalQuantity = 0;
+        var correctAnswerList = [];
+        var score = 0;
+
+        //Quiz Options validation
+        function validate(){
+            var amount =  document.forms["quizOptions"]["trivia_amount"].value;
+            console.log(amount)
+            data+="amount=" + amount;
+            qNumber = amount;
+            globalQuantity = amount;
+           
+
+
+            console.log(data);
+
+            if (document.forms["quizOptions"]["trivia_category"].value == "any"){
+                var category = "";
+                data+=category;
+            }else{
+                var category =  document.forms["quizOptions"]["trivia_category"].value;
+                data+="&category=" + category;
+                console.log(data);
+            }
+            if (document.forms["quizOptions"]["trivia_difficulty"].value == "any"){
+                var difficulty = "";
+                data+=difficulty;
+            }else{
+                var difficulty =  document.forms["quizOptions"]["trivia_difficulty"].value;
+                data+="&difficulty=" + difficulty;
+                console.log(data);
+            }
+            if (document.forms["quizOptions"]["trivia_type"].value == "any"){
+                var type = "";
+                data+=type;
+            }else{
+                var type =  document.forms["quizOptions"]["trivia_type"].value;
+                data+="&type=" + type;
+                console.log(data);
+            }
+//
+            console.log(data)
+            readJSON()
+        }
+
+        function displayQuiz() {
+            //console.log("fired")
+            document.getElementById('quizPosition').style.display = "block";
+            document.getElementById('quizMenu').style.display = "none";
+            document.getElementById('submitQuiz').style.display = "block";
+
+        }
+
+
+        function readJSON(){
+            $.ajax({
+                "url":"https://opentdb.com/api.php?",
+                "method":"GET",
+                "data": data,
+                "dataType":"JSON",
+                "success": function(result){
+                    for (question of result.results){
+                    showQuiz(question);
+                    correctAnswerList.push(question.correct_answer);
+                    console.log(correctAnswerList);
+                    }
+                    correctAnswerList.reverse();
+                },
+                "error":function(xhe,status,error){
+                    console.log("error: " +status+" msg:"+error);
+                }
+            });
+            data = "";
+        }
+
+        function showQuiz(question){
+            
+            //console.log("working so far");
+            var answers = [];
+            
+
+            //merge and shuffle answers array
+            answers = [].concat(question.incorrect_answers,question.correct_answer)
+            answers.sort(function(){
+                return 0.5 - Math.random();
+                });
+
+            tableElem = document.getElementById("quizTable");
+            tableElem.setAttribute("style", "border: 1px");
+            rowElem = tableElem.insertRow(0);
+            rowElem.setAttribute("id", qNumber);
+            
+            cell1 = rowElem.insertCell(0);
+            cell1.innerHTML = "<b>#" + qNumber+ " </b>"
+            cell2 = rowElem.insertCell(1);
+            cell2.innerHTML = "<b>Category: </b>" + question.category;
+            cell3 = rowElem.insertCell(2);
+            cell3.innerHTML = "<b>Difficulty: </b><br>" + question.difficulty;
+            cell4 = rowElem.insertCell(3);
+            cell4.innerHTML = "<b>Type: </b><br>" + question.type;
+
+            rowElem = tableElem.insertRow(1);
+            cell1 = rowElem.insertCell(0);
+            cell1.innerHTML = "<b>Question: </b>";
+            cell2 = rowElem.insertCell(1);
+            cell2.setAttribute("colspan", 3)
+            cell2.innerHTML = question.question;
+
+            rowElem = tableElem.insertRow(2);
+            cell1 = rowElem.insertCell(0);
+            cell1.innerHTML = "<b>Answers: </b>";
+            cell2 = rowElem.insertCell(1);
+            cell2.setAttribute("colspan", 3)
+            
+            for (answer of answers){
+                cell2.innerHTML += "<input type='radio' id="+optionID+" name="+qNumber+" value='"+ answer+ "'> <label for="+optionID+">"+answer+"</label> <br>";
+                optionID++;
+            }
+
+            rowElem = tableElem.insertRow(3);
+            cell1 = rowElem.insertCell(0);
+            cell1.setAttribute("colspan", 4)
+            cell1.setAttribute("style","background-color: #dce2eb; border: 0px solid transparent;")
+            qNumber--;
+
+        }
+
+        function checkUserAnswer(){
+            //console.log("start of function")
+            for (i = 1; i <= globalQuantity; i++) {
+                choice=document.querySelector('input[name="'+i+'"]:checked');
+                allchoices=document.getElementsByName(i);
+                check(choice,allchoices,i);
+                showScore();
+            }
+        }
+
+        function check(choice, allchoices,i){
+            console.log("start of check()")
+            console.log(choice.value)
+            console.log(correctAnswerList[i-1])
+            console.log(choice.value === correctAnswerList[i-1])
+            
+            if (choice.value === correctAnswerList[i-1]){
+                label=document.getElementById(choice.id).nextElementSibling;
+                label.setAttribute("style","border-style: solid; border-color: green;");
+                score++; 
+                return;
+            }
+            else{
+                label=document.getElementById(choice.id).nextElementSibling;
+                label.setAttribute("style","border-style: solid; border-color: red;")
+            }
+            for (j of allchoices){
+                if (j.value ==correctAnswerList[i-1]){
+                    label=document.getElementById(j.id).nextElementSibling;
+                    label.setAttribute("style","border-style: dotted; border-color: green;")
+                }
+            }
+
+        }
+
+        function showScore(){
+            document.getElementById('score').style.display = "block";
+            document.getElementById('score').innerHTML="<h3> You got "+score+"/"+globalQuantity+"</h3>"
+            document.getElementById('submitQuiz').style.display = "none";
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+        }
+
+
+
+
+
+    </script>
+</html>

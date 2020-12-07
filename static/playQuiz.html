@@ -1,0 +1,210 @@
+<html>
+    <head>
+        <title>Play Quiz</title>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+            
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        
+    </head>
+
+
+    <body style="background-color: #dce2eb; ">
+        
+        <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #5e7aaf;">
+            <a class="navbar-brand" style="color: white" href="#">Quiz Game</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+          
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav mr-auto" style="color: white">
+                <li class="nav-item active">
+                  <a class="nav-link" style="color: white" href="{{ url_for('home') }}">Home </a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" style="color: white" href="{{ url_for('play') }}">Play </a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" style="color: white" href="{{ url_for('createQuestion') }}">Create  </a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" style="color: white" href="{{ url_for('browseQuestions') }}">Browse All </a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" style="color: white" href="{{ url_for('thirdpartyquiz') }}">OpenTriviaDB </a>
+                </li>  
+              </ul>
+            <form class="form-inline my-2 my-lg-0">
+                <a href="{{ url_for('logout') }}" class="btn btn-danger active" role="button" aria-pressed="true">Logout</a>
+            </form>
+            </div>
+          </nav>
+
+
+        <div id="goBack" style="display: none; margin: 15px 15px 15px 15px; ">
+            <button type="button" class="btn btn-danger" onClick="window.location.reload();">Go Back</button>
+        </div>
+        <div id="menuBack" style=" margin: 15px 15px 15px 15px; ">
+            <a class="btn btn-danger" href="{{ url_for('home') }}" role="button">Go Back</a>
+        </div>
+
+        <div id="score" style="display: none; width: 200px; margin: 15px 15px 15px 15px; border: solid; border-color: #5e7aaf; border-radius: 25px; padding: 10px; ">
+        </div>
+
+        <div id="quizPosition" style="width: 1200px; margin: 15px 15px 15px 15px; display: none;" class="table-responsive">
+            <table id="quizTable" class="table table-bordered table-secondary">
+            
+            </table>
+
+        </div>
+
+        <div id="submitQuiz" style="display: none; margin: -30px 15px 15px 15px; ">
+            <button type="button" class="btn btn-primary" onClick="checkUserAnswer()">Finish</button>
+        </div>
+    </div>
+
+    </body>
+
+    <script>
+        host=window.location.origin;
+        var score = 0;
+        var optionID = 100;
+        var correctAnswerList = [];
+        var ids = [].concat({{ msg }});
+        ids.sort(function(){
+            return 0.5 - Math.random();
+        });
+        if (ids.length > 10) ids = ids.slice(0, 10);
+    
+        function readJSON(ids){
+            document.getElementById('quizPosition').style.display = "block";
+            document.getElementById('submitQuiz').style.display = "block";
+
+            
+            for (id of ids){
+                $.ajax({
+                    url:host+'/questions/'+id,
+                    method:'GET',
+                    datatype:'JSON',
+                    success:function(results){
+                        console.log("results",results)
+                        correctAnswerList.push(results.correct_answer);
+                        showQuestion(results);
+
+                    },
+                    error:function (xhr,status,error){
+                        console.log ("error "+error +" code:"+status)
+                    }
+
+                });
+            }
+
+
+        }
+
+
+        function showQuestion(question){
+
+            //console.log("working so far");
+            var incorrect = question.incorrect_answers.split(',')
+            var answers = [];
+                
+
+            //merge and shuffle answers array
+            answers = [].concat(incorrect,question.correct_answer)
+            answers.sort(function(){
+                return 0.5 - Math.random();
+                });
+
+            tableElem = document.getElementById("quizTable");
+            rowElem = tableElem.insertRow(0);
+
+            cell1 = rowElem.insertCell(0);
+            cell1.innerHTML = "<b>#" +question.id+ " </b>"
+            cell2 = rowElem.insertCell(1);
+            cell2.innerHTML = "<b>Category: </b>" + question.category;
+            cell3 = rowElem.insertCell(2);
+            cell3.innerHTML = "<b>Difficulty: </b><br>" + question.difficulty;
+            cell4 = rowElem.insertCell(3);
+            cell4.innerHTML = "<b>Type: </b><br>" + question.type;
+            cell5 = rowElem.insertCell(4);
+            cell5.innerHTML = "<b>Author: </b><br>" + question.author;
+
+            rowElem = tableElem.insertRow(1);
+            cell1 = rowElem.insertCell(0);
+            cell1.innerHTML = "<b>Question: </b>";
+            cell2 = rowElem.insertCell(1);
+            cell2.setAttribute("colspan", 4)
+            cell2.innerHTML = question.question;
+
+            rowElem = tableElem.insertRow(2);
+            cell1 = rowElem.insertCell(0);
+            cell1.innerHTML = "<b>Answers: </b>";
+            cell2 = rowElem.insertCell(1);
+            cell2.setAttribute("colspan", 4)
+            
+            for (answer of answers){
+                if (answer != ""){
+                    cell2.innerHTML += "<input type='radio' id="+optionID+" name="+question.id+" value='"+ answer+ "'> <label for="+optionID+">"+answer+"</label> <br>";
+                    optionID++;
+                }
+            }
+
+            rowElem = tableElem.insertRow(3);
+            cell1 = rowElem.insertCell(0);
+            cell1.setAttribute("colspan", 5)
+            cell1.setAttribute("style","background-color: #dce2eb; border: 0px solid transparent;")
+
+
+        }
+
+        function checkUserAnswer(){
+            //console.log("start of function")
+            for (id of ids){
+                choice=document.querySelector('input[name="'+id+'"]:checked');
+                allchoices=document.getElementsByName(id);
+                check(choice,allchoices);
+                showScore(ids);
+            }
+        }
+
+        function check(choice, allchoices){
+            console.log("start of check()")
+            console.log(choice.value)
+            
+            if (correctAnswerList.includes(choice.value)){
+                label=document.getElementById(choice.id).nextElementSibling;
+                label.setAttribute("style","border-style: solid; border-color: green;");
+                score++; 
+                return;
+            }
+            else{
+                label=document.getElementById(choice.id).nextElementSibling;
+                label.setAttribute("style","border-style: solid; border-color: red;")
+            }
+            for (j of allchoices){
+                if (correctAnswerList.includes(j.value)){
+                    label=document.getElementById(j.id).nextElementSibling;
+                    label.setAttribute("style","border-style: dotted; border-color: green;")
+                }
+            }
+
+        }
+
+        function showScore(ids){
+            document.getElementById('score').style.display = "block";
+            document.getElementById('score').innerHTML="<h3> You got "+score+"/"+ids.length+"</h3>"
+            document.getElementById('submitQuiz').style.display = "none";
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+        }
+
+
+
+
+
+        readJSON(ids);
+
+    </script>
+<html>

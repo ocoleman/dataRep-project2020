@@ -1,0 +1,313 @@
+<html>
+    <head>
+        <title>Browse Questions</title>
+        
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+            
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    </head>
+    <body style="background-color: #dce2eb; ">
+
+        <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #5e7aaf;">
+            <a class="navbar-brand" style="color: white" href="#">Quiz Game</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+          
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav mr-auto" style="color: white">
+                <li class="nav-item active">
+                  <a class="nav-link" style="color: white" href="{{ url_for('home') }}">Home </a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" style="color: white" href="{{ url_for('play') }}">Play </a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" style="color: white" href="{{ url_for('createQuestion') }}">Create  </a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" style="color: white" href="{{ url_for('browseQuestions') }}">Browse All </a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" style="color: white" href="{{ url_for('thirdpartyquiz') }}">OpenTriviaDB </a>
+                </li>  
+              </ul>
+            <form class="form-inline my-2 my-lg-0">
+                <a href="{{ url_for('logout') }}" class="btn btn-danger active" role="button" aria-pressed="true">Logout</a>
+            </form>
+            </div>
+          </nav>
+
+        <div id="goBack" style=" margin: 15px 15px 15px 15px; ">
+            <a class="btn btn-danger" href="{{ url_for('home') }}" role="button">Go Back</a>
+        </div>
+
+        <div id="questionsPosition" style="width: 1200px; margin: 15px 15px 15px 15px;" class="table">
+            <h2>All Questions</h2>
+            <table id="questionsTable" class="table table-bordered table-secondary">
+            
+            </table>
+
+        </div>
+
+        <div id="editPosition" style="width: 1200px; margin: 15px 15px 15px 15px; display: none;" class="table-responsive">
+            <h2>Edit Question</h2>
+            <table id="editTable" class="table table-bordered table-secondary">
+            
+            </table>
+            
+            <a class="btn btn-danger" onClick="window.location.reload();" role="button">Go Back</a>
+            <button type="button" class="btn btn-success" onclick="doUpdate()">Edit</button>
+        </div>
+        
+    </body>
+    <script>
+        host=window.location.origin;
+        var updateID=0;
+
+        function addQuestionToTable(){
+            tableElem = document.getElementById("questionsTable")
+            rowElem = tableElem.insertRow(0)
+            rowElem.setAttribute("id", question.id)
+
+            cell1 = rowElem.insertCell(0);
+            cell1.innerHTML = "<b>#" +question.id+ " </b>"
+            cell2 = rowElem.insertCell(1);
+            cell2.innerHTML = "<b>Category: </b>" + question.category;
+            cell3 = rowElem.insertCell(2);
+            cell3.innerHTML = "<b>Difficulty: </b><br>" + question.difficulty;
+            cell4 = rowElem.insertCell(3);
+            cell4.innerHTML = "<b>Type: </b><br>" + question.type;
+            cell5 = rowElem.insertCell(4);
+            cell5.innerHTML = "<b>Author: </b><br>" + question.author;
+            
+
+            rowElem = tableElem.insertRow(1);
+            cell1 = rowElem.insertCell(0);
+            cell1.innerHTML = "<b>Question: </b>";
+            cell2 = rowElem.insertCell(1);
+            cell2.setAttribute("colspan", 4)
+            cell2.innerHTML = question.question;
+            if (question.author === "{{ username }}"){
+                cell2.setAttribute("colspan", 3)
+                cell3 = rowElem.insertCell(2)
+                cell3.innerHTML += '  <button type="button" onclick="editQuestion('+question.id+')">Edit</button>'
+                cell3.innerHTML += '  <button type="button" onclick="doDelete('+question.id+')">Delete</button>'
+            }
+
+            
+        }
+
+        function populateTable(){
+            //ajax getAll
+            $.ajax({
+                url:host+'/questions',
+                method:'GET',
+                datatype:'JSON',
+                success:function(results){
+                        for (question of results){
+                            addQuestionToTable(question)
+                        }
+                },
+                error:function (xhr,status,error){
+                    console.log ("error "+error +" code:"+status)
+                }
+
+            })
+            
+        }
+        
+
+        function showEditMenu(){
+            document.getElementById('goBack').style.display = "none";
+            document.getElementById('editPosition').style.display = "block";
+            document.getElementById('questionsTable').style.display = "none";
+        }
+
+        function editQuestion(id){
+            $.ajax({
+                url:'http://127.0.0.1:5000/questions/'+id,
+                method:'GET',
+                datatype:'JSON',
+                success:function(results){
+                    console.log(results);
+                    showEditMenu();
+                    getQuestionData(results);
+                },
+                error:function (xhr,status,error){
+                    console.log ("error "+error +" code:"+status)
+                }
+
+            })
+        }
+
+        function getQuestionData(question){
+            updateID=question.id;
+            var incorrect = question.incorrect_answers.split(',')
+            console.log(incorrect);
+
+            var categoryHTML = '<select id="category"  class="form-control">'+
+                    '<option value="previous">'+question.category+'</option>'+
+                    '<option value="any">Any Category</option>'+
+                    '<option value="9">General Knowledge</option><option value="10">Entertainment: Books</option><option value="11">Entertainment: Film</option>'+
+                    '<option value="12">Entertainment: Music</option><option value="13">Entertainment: Musicals &amp; Theatres</option><option value="14">Entertainment: Television</option>'+
+                    '<option value="15">Entertainment: Video Games</option><option value="16">Entertainment: Board Games</option><option value="17">Science &amp; Nature</option>'+
+                    '<option value="18">Science: Computers</option><option value="19">Science: Mathematics</option><option value="20">Mythology</option><option value="21">Sports</option>'+
+                    '<option value="22">Geography</option><option value="23">History</option><option value="24">Politics</option><option value="25">Art</option>'+
+                    '<option value="26">Celebrities</option><option value="27">Animals</option><option value="28">Vehicles</option><option value="29">Entertainment: Comics</option>'+
+                    '<option value="30">Science: Gadgets</option><option value="31">Entertainment: Japanese Anime &amp; Manga</option>'+
+                    '<option value="32">Entertainment: Cartoon &amp; Animations</option>'+	
+                '</select>';
+
+            var difficultyHTML = '<select id="difficulty"  class="form-control">'+
+                        '<option value="previous">'+question.difficulty+'</option>'+
+                        '<option value="any">Any Difficulty</option>'+
+                        '<option value="easy">Easy</option>'+
+                        '<option value="medium">Medium</option>'+
+                        '<option value="hard">Hard</option>'+
+                    '</select>';
+
+            var typeHTML = '<select id="type"  class="form-control">'+
+                        '<option value="previous">'+question.difficulty+'</option>'+
+                        '<option value="any">Any Type</option>'+
+                        '<option value="multiple">Multiple Choice</option>'+
+                        '<option value="boolean">True / False</option>'+
+                    '</select>';
+
+            var correctAnswerHTML = '<div class="input-group">'+
+                        '<div class="input-group-prepend">'+
+                            '<div class="input-group-text">'+
+                            '<input type="radio"  aria-label="Radio button for following text input">'+
+                            '</div>'+
+                        '</div>'+
+                        '<input type="text" name="correct" value="'+question.correct_answer+'" class="form-control" aria-label="Text input with radio button">'+
+                        '</div>'
+            console.log(question);
+
+            tableElem = document.getElementById("editTable");
+            tableElem.setAttribute("style", "border: 1px");
+            caption = tableElem.createCaption();
+            caption.innerHTML="Question ID: "+question.id;
+            rowElem = tableElem.insertRow(0);
+            
+
+            cell1 = rowElem.insertCell(0);
+            cell1.setAttribute("style","vertical-align: middle;")
+            cell1.innerHTML = "<b>Author: </b> {{ username }}"
+            cell2 = rowElem.insertCell(1);
+            cell2.innerHTML = "<b>Category: </b>" + categoryHTML;
+            cell3 = rowElem.insertCell(2);
+            cell3.innerHTML = "<b>Difficulty: </b>" + difficultyHTML;
+            cell4 = rowElem.insertCell(3);
+            cell4.innerHTML = "<b>Type: </b>" + typeHTML;
+
+            rowElem = tableElem.insertRow(1);
+            cell1 = rowElem.insertCell(0);
+            cell1.innerHTML = "<b>Question: </b>";
+            cell2 = rowElem.insertCell(1);
+            cell2.setAttribute("colspan", 3)
+            cell2.innerHTML = "<input type='text' name='question' value='"+question.question+"' class='form-control' placeholder='Enter Question Here...'>"
+
+            rowElem = tableElem.insertRow(2);
+            cell1 = rowElem.insertCell(0);
+            cell1.innerHTML = "<b>Incorrect Answers: </b>";
+            cell2 = rowElem.insertCell(1);
+            cell2.setAttribute("colspan", 3)
+            cell2.setAttribute("id", "incorrectAnswerCell")
+            for (item of incorrect){
+                cell2.innerHTML+='<div class="input-group">'+
+                            '<div class="input-group-prepend">'+
+                                '<div class="input-group-text">'+
+                                '<input type="radio" aria-label="Radio button for following text input">'+
+                                '</div>'+
+                            '</div>'+
+                        '<input type="text" name="incorrect" value="'+item+'"  class="form-control" aria-label="Text input with radio button">'+
+                        '</div>';
+            }
+
+            rowElem = tableElem.insertRow(3);
+            cell1 = rowElem.insertCell(0);
+            cell1.innerHTML = "<b>Correct Answer: </b>";
+            cell2 = rowElem.insertCell(1);
+            cell2.setAttribute("colspan", 3)
+            cell2.setAttribute("id", "correctAnswerCell")
+            cell2.innerHTML = correctAnswerHTML;
+
+            rowElem = tableElem.insertRow(4);
+            cell1 = rowElem.insertCell(0);
+            cell1.setAttribute("colspan", 4)
+
+
+
+        }
+
+        function getQuizFromForm(){
+
+
+            var form = document.getElementById('editTable');
+            var incorrect_answers = [];
+            var question = {};
+            console.log("here");
+            question.author = "{{ username }}";
+            var sel = document.getElementById("category");
+            question.category = sel.options[sel.selectedIndex].text;
+            var sel = document.getElementById("difficulty");
+            question.difficulty = sel.options[sel.selectedIndex].text;
+            var sel = document.getElementById("type");
+            question.type = sel.options[sel.selectedIndex].text;
+            question.question = form.querySelector('input[name="question"').value;
+            question.correct_answer = form.querySelector('input[name="correct"').value;
+            incorrect = document.getElementsByName("incorrect");
+            for (j of incorrect){
+                incorrect_answers.push(j.value);
+            }
+            question.incorrect_answers=incorrect_answers;
+
+
+            return question;
+        }
+
+        function doUpdate(){
+            console.log("in doUpdate")
+            question = getQuizFromForm()
+            console.log(question);
+            $.ajax({
+                url:host+"/questions/"+updateID,
+                data:JSON.stringify(question),
+                method:"PUT",
+                dataType:"JSON",
+                contentType: "application/json; charset=utf-8",
+                success:function(result){
+                    console.log(result)
+
+                },
+                error:function(xhr,status,error){
+                    console.log("error"+error)
+                }
+            })
+            
+        }
+
+        populateTable();
+
+        function doDelete(id){
+            $.ajax({
+                url:host+"/questions/"+id,
+                method:"DELETE",
+                dateType:"JSON",
+                success:function(result){
+                    window.location.reload();
+                },
+                error:function(xhr,status,error){
+                    console.log(error)
+                }
+            })
+            
+        }
+
+
+        
+
+    </script>
+
+</html>

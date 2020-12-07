@@ -1,0 +1,73 @@
+<html>
+    <head>
+        <title>Home</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+            
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    </head>
+    <body style="background-color: #dce2eb; ">
+        <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #5e7aaf;">
+            <a class="navbar-brand" style="color: white" href="#">Quiz Game</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+          
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav mr-auto" style="color: white">
+                <li class="nav-item active">
+                  <a class="nav-link" style="color: white" href="{{ url_for('home') }}">Home </a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" style="color: white" href="{{ url_for('play') }}">Play </a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" style="color: white" href="{{ url_for('createQuestion') }}">Create  </a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" style="color: white" href="{{ url_for('browseQuestions') }}">Browse All </a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" style="color: white" href="{{ url_for('thirdpartyquiz') }}">OpenTriviaDB </a>
+                </li>  
+              </ul>
+            <form class="form-inline my-2 my-lg-0">
+              <a href="{{ url_for('logout') }}" class="btn btn-danger active" role="button" aria-pressed="true">Logout</a>
+            </form>
+            </div>
+          </nav>
+        <div style="margin: 15px 15px 15px 15px;">
+          <h1>Welcome back, {{ username }}!</h1>
+        </div>
+        <br><br>
+        <div class="container">
+            <!-- Example row of columns -->
+            <div class="row">
+              <div class="col">
+                <h2>Play Quiz</h2>
+                <p>Play a quiz with random questions (max 10) from the database.</p>
+                <p><a class="btn btn-primary" href="{{ url_for('play') }}" role="button">Play &raquo;</a></p>
+              </div>
+              <div class="col">
+                <h2>Create a Question</h2>
+                <p>Create a question that will be used in the Quiz.</p>
+                <p><a class="btn btn-primary" href="{{ url_for('createQuestion') }}" role="button">Create &raquo;</a></p>
+              </div>
+              <div class="w-100"></div>
+              <div class="col">
+                <h2>Browse All</h2>
+                <p>Browse all the questions currently on record.</p>
+                <p><a class="btn btn-primary" href="{{ url_for('browseQuestions') }}" role="button">Browse All &raquo;</a></p>
+              </div>
+              <div class="col">
+                <h2>OpenTriviaDB Quiz</h2>
+                <p>Play a quiz with questions retrieved from the The Open Trivia Database.</p>
+                <p><a class="btn btn-primary" href="{{ url_for('thirdpartyquiz') }}" role="button">OpenTriviaDB &raquo;</a></p>
+              </div>
+            </div>
+    
+            <hr>
+    
+          </div> <!-- /container -->
+        <br>
+    </body>
+</html>

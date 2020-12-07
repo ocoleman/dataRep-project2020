@@ -1,0 +1,31 @@
+<html>
+    <head>
+        <title>Login</title>
+        
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+            
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    </head>
+    <body class="text-center" style="background-color: #dce2eb; ">
+
+        <nav class="navbar navbar-light" style="background-color: #5e7aaf;">
+            <a class="navbar-brand" href="{{ url_for('home') }}">Quiz Game</a>
+        </nav>
+
+        <form class="form-signin" action="{{ url_for('login') }}" method="post" style=" margin: 15px 15px 15px 15px;">
+            <h1 class="h3 mb-3 font-weight-normal">Please Log In</h1>
+            <div class="form-group">
+                <label for="uname"><b>Username</b></label>
+                <input type="text" placeholder="Enter Username" id="uname" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="psw"><b>Password</b></label>
+                <input type="password" placeholder="Enter Password" id="psw" name="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary" value="login">Login</button>
+        </form>
+        <div id="msg" style="color: red">{{msg}}</div>
+        Dont have an account? <a href="{{ url_for('register') }}">Register here</a>
+    </body>
+
+</html>

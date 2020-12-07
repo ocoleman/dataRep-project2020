@@ -1,0 +1,201 @@
+<html>
+    <head>
+        <title>Create A Quiz</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+            
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    </head>
+    <body style="background-color: #dce2eb; ">
+
+        <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #5e7aaf;">
+            <a class="navbar-brand" style="color: white" href="#">Quiz Game</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+          
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav mr-auto" style="color: white">
+                <li class="nav-item active">
+                  <a class="nav-link" style="color: white" href="{{ url_for('home') }}">Home </a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" style="color: white" href="{{ url_for('play') }}">Play </a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" style="color: white" href="{{ url_for('createQuestion') }}">Create  </a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" style="color: white" href="{{ url_for('browseQuestions') }}">Browse All </a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" style="color: white" href="{{ url_for('thirdpartyquiz') }}">OpenTriviaDB </a>
+                </li>  
+              </ul>
+            <form class="form-inline my-2 my-lg-0">
+                <a href="{{ url_for('logout') }}" class="btn btn-danger active" role="button" aria-pressed="true">Logout</a>
+            </form>
+            </div>
+          </nav>
+
+
+        <div id="quizPosition" style="width: 1200px; margin: 15px 15px 15px 15px;" class="table-responsive">
+            <h2>Create a Question</h2>
+            <table id="quizTable" class="table table-bordered table-secondary">
+            
+            </table>
+            
+            <a class="btn btn-danger" href="{{ url_for('home') }}" role="button">Go Back</a>
+            <button type="button" class="btn btn-success" onclick="doCreate()">Post Question</button>
+        </div>
+        
+    
+    </body>
+
+    <script>
+        host=window.location.origin;
+        var idNumber = 1;
+        var questionCount = 0;
+
+        
+
+        function generateQuestion(){
+
+            var categoryHTML = '<select id="category"  class="form-control">'+
+                    '<option value="any">Any Category</option>'+
+                    '<option value="9">General Knowledge</option><option value="10">Entertainment: Books</option><option value="11">Entertainment: Film</option>'+
+                    '<option value="12">Entertainment: Music</option><option value="13">Entertainment: Musicals &amp; Theatres</option><option value="14">Entertainment: Television</option>'+
+                    '<option value="15">Entertainment: Video Games</option><option value="16">Entertainment: Board Games</option><option value="17">Science &amp; Nature</option>'+
+                    '<option value="18">Science: Computers</option><option value="19">Science: Mathematics</option><option value="20">Mythology</option><option value="21">Sports</option>'+
+                    '<option value="22">Geography</option><option value="23">History</option><option value="24">Politics</option><option value="25">Art</option>'+
+                    '<option value="26">Celebrities</option><option value="27">Animals</option><option value="28">Vehicles</option><option value="29">Entertainment: Comics</option>'+
+                    '<option value="30">Science: Gadgets</option><option value="31">Entertainment: Japanese Anime &amp; Manga</option>'+
+                    '<option value="32">Entertainment: Cartoon &amp; Animations</option>'+	
+                '</select>';
+
+        var difficultyHTML = '<select id="difficulty"  class="form-control">'+
+                    '<option value="any">Any Difficulty</option>'+
+                    '<option value="easy">Easy</option>'+
+                    '<option value="medium">Medium</option>'+
+                    '<option value="hard">Hard</option>'+
+                '</select>';
+
+        var typeHTML = '<select id="type"  class="form-control">'+
+                    '<option value="any">Any Type</option>'+
+                    '<option value="multiple">Multiple Choice</option>'+
+                    '<option value="boolean">True / False</option>'+
+                '</select>';
+
+        var incorrectAnswerHTML = '<div class="input-group">'+
+                    '<div class="input-group-prepend">'+
+                        '<div class="input-group-text">'+
+                        '<input type="radio" aria-label="Radio button for following text input">'+
+                        '</div>'+
+                   '</div>'+
+                    '<input type="text" name="incorrect"  class="form-control" aria-label="Text input with radio button">'+
+                    '</div>'
+        var correctAnswerHTML = '<div class="input-group">'+
+                    '<div class="input-group-prepend">'+
+                        '<div class="input-group-text">'+
+                        '<input type="radio"  aria-label="Radio button for following text input">'+
+                        '</div>'+
+                    '</div>'+
+                    '<input type="text" name="correct" class="form-control" aria-label="Text input with radio button">'+
+                    '</div>'
+            
+            tableElem = document.getElementById("quizTable");
+            tableElem.setAttribute("style", "border: 1px");
+            rowElem = tableElem.insertRow(0);
+
+            cell1 = rowElem.insertCell(0);
+            cell1.setAttribute("style","vertical-align: middle;")
+            cell1.innerHTML = "<b>Author: </b> {{ username }}"
+            cell2 = rowElem.insertCell(1);
+            cell2.innerHTML = "<b>Category: </b>" + categoryHTML;
+            cell3 = rowElem.insertCell(2);
+            cell3.innerHTML = "<b>Difficulty: </b>" + difficultyHTML;
+            cell4 = rowElem.insertCell(3);
+            cell4.innerHTML = "<b>Type: </b>" + typeHTML;
+
+            rowElem = tableElem.insertRow(1);
+            cell1 = rowElem.insertCell(0);
+            cell1.innerHTML = "<b>Question: </b>";
+            cell2 = rowElem.insertCell(1);
+            cell2.setAttribute("colspan", 3)
+            cell2.innerHTML = "<input type='text' name='question'class='form-control' placeholder='Enter Question Here...'>"
+
+            rowElem = tableElem.insertRow(2);
+            cell1 = rowElem.insertCell(0);
+            cell1.innerHTML = "<b>Incorrect Answers: </b>";
+            cell2 = rowElem.insertCell(1);
+            cell2.setAttribute("colspan", 3)
+            cell2.setAttribute("id", "incorrectAnswerCell"+idNumber)
+            cell2.innerHTML = incorrectAnswerHTML + incorrectAnswerHTML + incorrectAnswerHTML;
+
+            rowElem = tableElem.insertRow(3);
+            cell1 = rowElem.insertCell(0);
+            cell1.innerHTML = "<b>Correct Answer: </b>";
+            cell2 = rowElem.insertCell(1);
+            cell2.setAttribute("colspan", 3)
+            cell2.setAttribute("id", "correctAnswerCell"+idNumber)
+            cell2.innerHTML = correctAnswerHTML;
+
+            rowElem = tableElem.insertRow(4);
+            cell1 = rowElem.insertCell(0);
+            cell1.setAttribute("colspan", 4)
+            cell1.setAttribute("style","background-color: #dce2eb; border: 0px solid transparent;")
+            idNumber++;
+            questionCount++;
+
+        }
+        
+        function getQuizFromForm(){
+
+            var form = document.getElementById('quizTable');
+            var incorrect_answers = [];
+            var question = {};
+            console.log("here");
+            question.author = "{{ username }}";
+            var sel = document.getElementById("category");
+            question.category = sel.options[sel.selectedIndex].text;
+            var sel = document.getElementById("difficulty");
+            question.difficulty = sel.options[sel.selectedIndex].text;
+            var sel = document.getElementById("type");
+            question.type = sel.options[sel.selectedIndex].text;
+            question.question = form.querySelector('input[name="question"').value;
+            question.correct_answer = form.querySelector('input[name="correct"').value;
+            incorrect = document.getElementsByName("incorrect");
+            for (j of incorrect){
+                incorrect_answers.push(j.value);
+            }
+            question.incorrect_answers=incorrect_answers;
+
+        
+            return question;
+        }
+
+        function doCreate(){
+            console.log("in doCreate")
+            question = getQuizFromForm()
+            console.log(question);
+            $.ajax({
+                url:host+"/questions",
+                data:JSON.stringify(question),
+                method:"POST",
+                dataType:"JSON",
+                contentType: "application/json; charset=utf-8",
+                success:function(result){
+                    console.log(result)
+                    window.location.replace("{{ url_for('home') }}");
+
+                },
+                error:function(xhr,status,error){
+                    console.log("error"+error)
+                }
+            })
+            
+        }
+    
+
+        generateQuestion()
+    </script>
+</html>
