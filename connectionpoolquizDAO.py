@@ -9,7 +9,8 @@ class QuizDAO:
             password=   cfg.mysql['password'],
             database=   cfg.mysql['database'],
             pool_name='my_connection_pool',
-            pool_size=10
+            pool_size=20,
+            connection_timeout=300
         )
         return db
 
