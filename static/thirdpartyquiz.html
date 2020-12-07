@@ -115,32 +115,34 @@
 
     <script>
         //Global variables
-        var data = "";
-        var qNumber = 0;
-        var optionID = 100;
-        var globalQuantity = 0;
-        var correctAnswerList = [];
-        var score = 0;
+        //data variable to be passed to ajax.
+        var data = ""; 
+        //global variable used as the de facto id
+        var qNumber = 0; 
+        //Global option id set at 100 to avoid conflicts.
+        var optionID = 100; 
+        //global variable used to store amount of questions.
+        var globalQuantity = 0; 
+        //Global correctAnswerList stores correct answer of each question.
+        var correctAnswerList = []; 
+        //score variable
+        var score = 0; 
 
-        //Quiz Options validation
+        //function for various appendages to the api url, based on chosen values from the quiz options menu.
         function validate(){
+            //amount of questions in quiz (max 10)
             var amount =  document.forms["quizOptions"]["trivia_amount"].value;
-            console.log(amount)
             data+="amount=" + amount;
             qNumber = amount;
             globalQuantity = amount;
-           
 
-
-            console.log(data);
-
+            //if chosen category is "any", add nothing (default) etc
             if (document.forms["quizOptions"]["trivia_category"].value == "any"){
                 var category = "";
                 data+=category;
             }else{
                 var category =  document.forms["quizOptions"]["trivia_category"].value;
                 data+="&category=" + category;
-                console.log(data);
             }
             if (document.forms["quizOptions"]["trivia_difficulty"].value == "any"){
                 var difficulty = "";
@@ -148,7 +150,6 @@
             }else{
                 var difficulty =  document.forms["quizOptions"]["trivia_difficulty"].value;
                 data+="&difficulty=" + difficulty;
-                console.log(data);
             }
             if (document.forms["quizOptions"]["trivia_type"].value == "any"){
                 var type = "";
@@ -156,13 +157,12 @@
             }else{
                 var type =  document.forms["quizOptions"]["trivia_type"].value;
                 data+="&type=" + type;
-                console.log(data);
             }
-//
-            console.log(data)
+            //once options are chosen, readJSON function called.
             readJSON()
         }
 
+        //Function to show/hide the different tables.
         function displayQuiz() {
             //console.log("fired")
             document.getElementById('quizPosition').style.display = "block";
@@ -171,7 +171,7 @@
 
         }
 
-
+        //ajax GET, passed variable 'data' containing various url appendages.
         function readJSON(){
             $.ajax({
                 "url":"https://opentdb.com/api.php?",
@@ -180,9 +180,10 @@
                 "dataType":"JSON",
                 "success": function(result){
                     for (question of result.results){
+                    //each question in results is passed to showQuiz() function.
                     showQuiz(question);
+                    ///correct answer of each question passed to correctAnswerList
                     correctAnswerList.push(question.correct_answer);
-                    console.log(correctAnswerList);
                     }
                     correctAnswerList.reverse();
                 },
@@ -193,23 +194,23 @@
             data = "";
         }
 
+        //Function to generate a table, with rows containing various input fields.
         function showQuiz(question){
-            
-            //console.log("working so far");
             var answers = [];
-            
 
-            //merge and shuffle answers array
+            //both correct and incorrect answers are shuffled into new answer array.
             answers = [].concat(question.incorrect_answers,question.correct_answer)
             answers.sort(function(){
                 return 0.5 - Math.random();
                 });
 
+            //Table displaying each question   
             tableElem = document.getElementById("quizTable");
             tableElem.setAttribute("style", "border: 1px");
             rowElem = tableElem.insertRow(0);
             rowElem.setAttribute("id", qNumber);
             
+            //Row 1
             cell1 = rowElem.insertCell(0);
             cell1.innerHTML = "<b>#" + qNumber+ " </b>"
             cell2 = rowElem.insertCell(1);
@@ -218,25 +219,29 @@
             cell3.innerHTML = "<b>Difficulty: </b><br>" + question.difficulty;
             cell4 = rowElem.insertCell(3);
             cell4.innerHTML = "<b>Type: </b><br>" + question.type;
-
+            
+            //Row 2
             rowElem = tableElem.insertRow(1);
             cell1 = rowElem.insertCell(0);
             cell1.innerHTML = "<b>Question: </b>";
             cell2 = rowElem.insertCell(1);
             cell2.setAttribute("colspan", 3)
             cell2.innerHTML = question.question;
-
+            
+            //Row 3
             rowElem = tableElem.insertRow(2);
             cell1 = rowElem.insertCell(0);
             cell1.innerHTML = "<b>Answers: </b>";
             cell2 = rowElem.insertCell(1);
             cell2.setAttribute("colspan", 3)
             
+            //Radio inputs for each answer.
             for (answer of answers){
                 cell2.innerHTML += "<input type='radio' id="+optionID+" name="+qNumber+" value='"+ answer+ "'> <label for="+optionID+">"+answer+"</label> <br>";
                 optionID++;
             }
 
+            //Row 4
             rowElem = tableElem.insertRow(3);
             cell1 = rowElem.insertCell(0);
             cell1.setAttribute("colspan", 4)
@@ -245,41 +250,40 @@
 
         }
 
+        //Function for checking the values selected by the user
         function checkUserAnswer(){
-            //console.log("start of function")
             for (i = 1; i <= globalQuantity; i++) {
                 choice=document.querySelector('input[name="'+i+'"]:checked');
                 allchoices=document.getElementsByName(i);
                 check(choice,allchoices,i);
+                //call of showScore()
                 showScore();
             }
         }
 
         function check(choice, allchoices,i){
-            console.log("start of check()")
-            console.log(choice.value)
-            console.log(correctAnswerList[i-1])
-            console.log(choice.value === correctAnswerList[i-1])
-            
+
+            //if users choice is correct, highlight green
             if (choice.value === correctAnswerList[i-1]){
                 label=document.getElementById(choice.id).nextElementSibling;
                 label.setAttribute("style","border-style: solid; border-color: green;");
                 score++; 
                 return;
             }
+            //if incorrect, highlight red
             else{
                 label=document.getElementById(choice.id).nextElementSibling;
                 label.setAttribute("style","border-style: solid; border-color: red;")
             }
+            //if incorrect, show the correct answer in dotted green.
             for (j of allchoices){
                 if (j.value ==correctAnswerList[i-1]){
                     label=document.getElementById(j.id).nextElementSibling;
                     label.setAttribute("style","border-style: dotted; border-color: green;")
                 }
             }
-
         }
-
+        //Displays the gotten score at the top of the page.
         function showScore(){
             document.getElementById('score').style.display = "block";
             document.getElementById('score').innerHTML="<h3> You got "+score+"/"+globalQuantity+"</h3>"
@@ -287,10 +291,5 @@
             document.body.scrollTop = 0;
             document.documentElement.scrollTop = 0;
         }
-
-
-
-
-
     </script>
 </html>

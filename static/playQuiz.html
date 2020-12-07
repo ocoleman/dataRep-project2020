@@ -68,9 +68,15 @@
 
     <script>
         host=window.location.origin;
+        //Score variable
         var score = 0;
+        //Global option id set at 100 to avoid conflicts.
         var optionID = 100;
+        //Global correctAnswerList stores correct answer of each question.
         var correctAnswerList = [];
+
+        //list of ids taken from flask, used to get various questions.
+        //the list is shuffled and a maximum of 10 are then passed to the ajax function.
         var ids = [].concat({{ msg }});
         ids.sort(function(){
             return 0.5 - Math.random();
@@ -78,10 +84,9 @@
         if (ids.length > 10) ids = ids.slice(0, 10);
     
         function readJSON(ids){
+            //quiz table and finish button become visible.
             document.getElementById('quizPosition').style.display = "block";
             document.getElementById('submitQuiz').style.display = "block";
-
-            
             for (id of ids){
                 $.ajax({
                     url:host+'/questions/'+id,
@@ -89,7 +94,9 @@
                     datatype:'JSON',
                     success:function(results){
                         console.log("results",results)
+                        //correct answer of each question passed to correctAnswerList
                         correctAnswerList.push(results.correct_answer);
+                        //Table generator passed each question.
                         showQuestion(results);
 
                     },
@@ -103,23 +110,23 @@
 
         }
 
-
+        //Function to generate a table, with rows containing various input fields.
         function showQuestion(question){
-
-            //console.log("working so far");
+            //incorrect answers are converted back into a list from string.
             var incorrect = question.incorrect_answers.split(',')
             var answers = [];
                 
-
-            //merge and shuffle answers array
+            //both correct and incorrect answers are shuffled into answer array.
             answers = [].concat(incorrect,question.correct_answer)
             answers.sort(function(){
                 return 0.5 - Math.random();
                 });
-
+            
+            //Table displaying each question
             tableElem = document.getElementById("quizTable");
             rowElem = tableElem.insertRow(0);
-
+            
+            //Row 1
             cell1 = rowElem.insertCell(0);
             cell1.innerHTML = "<b>#" +question.id+ " </b>"
             cell2 = rowElem.insertCell(1);
@@ -130,20 +137,23 @@
             cell4.innerHTML = "<b>Type: </b><br>" + question.type;
             cell5 = rowElem.insertCell(4);
             cell5.innerHTML = "<b>Author: </b><br>" + question.author;
-
+            
+            //Row 2
             rowElem = tableElem.insertRow(1);
             cell1 = rowElem.insertCell(0);
             cell1.innerHTML = "<b>Question: </b>";
             cell2 = rowElem.insertCell(1);
             cell2.setAttribute("colspan", 4)
             cell2.innerHTML = question.question;
-
+            
+            //Row 3
             rowElem = tableElem.insertRow(2);
             cell1 = rowElem.insertCell(0);
             cell1.innerHTML = "<b>Answers: </b>";
             cell2 = rowElem.insertCell(1);
             cell2.setAttribute("colspan", 4)
-            
+
+           //Radio inputs for each answer, ignoring blanks. 
             for (answer of answers){
                 if (answer != ""){
                     cell2.innerHTML += "<input type='radio' id="+optionID+" name="+question.id+" value='"+ answer+ "'> <label for="+optionID+">"+answer+"</label> <br>";
@@ -151,6 +161,7 @@
                 }
             }
 
+            //Row 4
             rowElem = tableElem.insertRow(3);
             cell1 = rowElem.insertCell(0);
             cell1.setAttribute("colspan", 5)
@@ -158,31 +169,33 @@
 
 
         }
-
+        
+        //Function for checking the values selected by the user
         function checkUserAnswer(){
-            //console.log("start of function")
             for (id of ids){
                 choice=document.querySelector('input[name="'+id+'"]:checked');
                 allchoices=document.getElementsByName(id);
                 check(choice,allchoices);
+                //call of showScore()
                 showScore(ids);
             }
         }
 
         function check(choice, allchoices){
-            console.log("start of check()")
-            console.log(choice.value)
             
+            //if users choice is correct, highlight green
             if (correctAnswerList.includes(choice.value)){
                 label=document.getElementById(choice.id).nextElementSibling;
                 label.setAttribute("style","border-style: solid; border-color: green;");
-                score++; 
+                score++; //score + 1
                 return;
             }
+            //if incorrect, highlight red
             else{
                 label=document.getElementById(choice.id).nextElementSibling;
                 label.setAttribute("style","border-style: solid; border-color: red;")
             }
+            //if incorrect, show the correct answer in dotted green.
             for (j of allchoices){
                 if (correctAnswerList.includes(j.value)){
                     label=document.getElementById(j.id).nextElementSibling;
@@ -192,6 +205,7 @@
 
         }
 
+        //Displays the gotten score at the top of the page.
         function showScore(ids){
             document.getElementById('score').style.display = "block";
             document.getElementById('score').innerHTML="<h3> You got "+score+"/"+ids.length+"</h3>"
@@ -202,8 +216,7 @@
 
 
 
-
-
+        //function called on page load. 
         readJSON(ids);
 
     </script>

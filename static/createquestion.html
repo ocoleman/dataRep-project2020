@@ -53,15 +53,9 @@
 
     <script>
         host=window.location.origin;
-        var idNumber = 1;
-        var questionCount = 0;
 
-        
-
-        function generateQuestion(){
-
-            var categoryHTML = '<select id="category"  class="form-control">'+
-                    '<option value="any">Any Category</option>'+
+        //HTML for various input fields of the table, added to variables to reduce clutter.
+        var categoryHTML = '<select id="category"  class="form-control">'+
                     '<option value="9">General Knowledge</option><option value="10">Entertainment: Books</option><option value="11">Entertainment: Film</option>'+
                     '<option value="12">Entertainment: Music</option><option value="13">Entertainment: Musicals &amp; Theatres</option><option value="14">Entertainment: Television</option>'+
                     '<option value="15">Entertainment: Video Games</option><option value="16">Entertainment: Board Games</option><option value="17">Science &amp; Nature</option>'+
@@ -73,14 +67,12 @@
                 '</select>';
 
         var difficultyHTML = '<select id="difficulty"  class="form-control">'+
-                    '<option value="any">Any Difficulty</option>'+
                     '<option value="easy">Easy</option>'+
                     '<option value="medium">Medium</option>'+
                     '<option value="hard">Hard</option>'+
                 '</select>';
 
         var typeHTML = '<select id="type"  class="form-control">'+
-                    '<option value="any">Any Type</option>'+
                     '<option value="multiple">Multiple Choice</option>'+
                     '<option value="boolean">True / False</option>'+
                 '</select>';
@@ -101,11 +93,16 @@
                     '</div>'+
                     '<input type="text" name="correct" class="form-control" aria-label="Text input with radio button">'+
                     '</div>'
-            
+
+        var questionHTML = "<input type='text' name='question'class='form-control' placeholder='Enter Question Here...'>"
+
+        //Function to generate a table, with rows containing various input fields.
+        function generateQuestion(){
             tableElem = document.getElementById("quizTable");
             tableElem.setAttribute("style", "border: 1px");
             rowElem = tableElem.insertRow(0);
 
+            //Row 1
             cell1 = rowElem.insertCell(0);
             cell1.setAttribute("style","vertical-align: middle;")
             cell1.innerHTML = "<b>Author: </b> {{ username }}"
@@ -116,40 +113,43 @@
             cell4 = rowElem.insertCell(3);
             cell4.innerHTML = "<b>Type: </b>" + typeHTML;
 
+            //Row2
             rowElem = tableElem.insertRow(1);
             cell1 = rowElem.insertCell(0);
             cell1.innerHTML = "<b>Question: </b>";
             cell2 = rowElem.insertCell(1);
             cell2.setAttribute("colspan", 3)
-            cell2.innerHTML = "<input type='text' name='question'class='form-control' placeholder='Enter Question Here...'>"
+            cell2.setAttribute("id","questionCell")
+            cell2.innerHTML = questionHTML;
 
+            //Row 3
             rowElem = tableElem.insertRow(2);
             cell1 = rowElem.insertCell(0);
             cell1.innerHTML = "<b>Incorrect Answers: </b>";
             cell2 = rowElem.insertCell(1);
             cell2.setAttribute("colspan", 3)
-            cell2.setAttribute("id", "incorrectAnswerCell"+idNumber)
+            cell2.setAttribute("id", "incorrectAnswerCell")
             cell2.innerHTML = incorrectAnswerHTML + incorrectAnswerHTML + incorrectAnswerHTML;
 
+            //Row 4
             rowElem = tableElem.insertRow(3);
             cell1 = rowElem.insertCell(0);
             cell1.innerHTML = "<b>Correct Answer: </b>";
             cell2 = rowElem.insertCell(1);
             cell2.setAttribute("colspan", 3)
-            cell2.setAttribute("id", "correctAnswerCell"+idNumber)
+            cell2.setAttribute("id", "correctAnswerCell")
             cell2.innerHTML = correctAnswerHTML;
 
+            //Row 5
             rowElem = tableElem.insertRow(4);
             cell1 = rowElem.insertCell(0);
             cell1.setAttribute("colspan", 4)
             cell1.setAttribute("style","background-color: #dce2eb; border: 0px solid transparent;")
-            idNumber++;
-            questionCount++;
 
         }
         
+        //Function gets the values from the various input/select fields of the table.
         function getQuizFromForm(){
-
             var form = document.getElementById('quizTable');
             var incorrect_answers = [];
             var question = {};
@@ -164,8 +164,11 @@
             question.question = form.querySelector('input[name="question"').value;
             question.correct_answer = form.querySelector('input[name="correct"').value;
             incorrect = document.getElementsByName("incorrect");
+            //loop through incorrect answers and add to list, ignoring blanks.
             for (j of incorrect){
-                incorrect_answers.push(j.value);
+                if (j.value != ""){
+                    incorrect_answers.push(j.value);
+                }
             }
             question.incorrect_answers=incorrect_answers;
 
@@ -174,9 +177,53 @@
         }
 
         function doCreate(){
-            console.log("in doCreate")
+            //Creates question object
             question = getQuizFromForm()
-            console.log(question);
+            //--Error Handling--
+            //if no question.
+            console.log(question.incorrect_answers[0])
+            if (question.question == ""){
+                errormsg = document.getElementById("questionCell");
+                errormsg.setAttribute("style","color:red")
+                errormsg.innerHTML= questionHTML + "Error: Question field required. "
+                return;
+            }
+            //if no incorrect answers.
+            if (question.incorrect_answers.length == 0){
+                errormsg = document.getElementById("incorrectAnswerCell");
+                errormsg.setAttribute("style","color:red")
+                errormsg.innerHTML=incorrectAnswerHTML + incorrectAnswerHTML + incorrectAnswerHTML + "Error: At least one incorrect answer must be given." 
+                return;
+            }
+            //if True/False with more than 2 choices.
+            if ((question.type == "True / False") && (question.incorrect_answers.length > 1)){
+                errormsg = document.getElementById("incorrectAnswerCell");
+                errormsg.setAttribute("style","color:red")
+                errormsg.innerHTML=incorrectAnswerHTML + incorrectAnswerHTML + incorrectAnswerHTML + "Error: Too many choices given for True / False Question." 
+                return;
+            }
+            //if True/False and an incorrect answer is not "True" or "False".
+            if ((question.type == "True / False") && (!(question.incorrect_answers == "True" || question.incorrect_answers == "False"))){
+                errormsg = document.getElementById("incorrectAnswerCell");
+                errormsg.setAttribute("style","color:red")
+                errormsg.innerHTML=incorrectAnswerHTML + incorrectAnswerHTML + incorrectAnswerHTML + "Error: Please provide 'True' or 'False' only" 
+                return;
+            }
+            //if no correct answer
+            if (question.correct_answer == ""){
+                errormsg = document.getElementById("correctAnswerCell");
+                errormsg.setAttribute("style","color:red")
+                errormsg.innerHTML= correctAnswerHTML + "Error: Correct answer field required. "
+                return;
+            }
+            //if True/False and an correct answer is not "True" or "False".
+            if ((question.type == "True / False") && (!(question.correct_answer == "True" || question.correct_answer == "False"))){
+                errormsg = document.getElementById("correctAnswerCell");
+                errormsg.setAttribute("style","color:red")
+                errormsg.innerHTML= correctAnswerHTML + "Error: Please provide 'True' or 'False' only" 
+                return;
+            }
+            //ajax POST
             $.ajax({
                 url:host+"/questions",
                 data:JSON.stringify(question),
@@ -195,7 +242,7 @@
             
         }
     
-
+        //question table generated on page load.
         generateQuestion()
     </script>
 </html>
