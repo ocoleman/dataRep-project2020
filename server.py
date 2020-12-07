@@ -1,5 +1,5 @@
 from flask import Flask, url_for, request, abort, redirect, jsonify, session, render_template, url_for
-from connectionpoolquizDAO import quizDAO as quizDAO
+from quizDAO import quizDAO
 import re
 app = Flask(__name__, template_folder='static')
 app.secret_key= 'somesecretkeyadaf23'
