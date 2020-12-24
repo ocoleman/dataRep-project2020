@@ -12,6 +12,28 @@ NOTE: Ensure you have the python virtualenv package before attempting to create 
 
 Next, enter the following command to install flask and the other packages required by this application: "pip install -r requirements.txt". Finally, set the FLASK_APP environment variable equal to server.py as follows "set FLASK_APP=server.py". You should now be able to run the application by simply typing "flask run".
 <br>
+
+## database.sql
+Below is the sql I used when creating the database tables for this project.
+```sql
+use datarepresentation;
+
+create table user ( id int NOT NULL AUTO_INCREMENT,
+username varchar(250),
+password varchar(250),
+PRIMARY KEY(id));
+
+create table questions ( id int NOT NULL AUTO_INCREMENT, 
+author varchar(250), 
+category varchar(250), 
+correct_answer varchar(250), 
+incorrect_answers varchar(250),
+type varchar(250),
+difficulty varchar(250),
+question varchar(250),
+PRIMARY KEY(id));
+```
+
 ## Sources 
 List of sources used during this project.
 1. Flask Documentation, Quickstart , https://flask.palletsprojects.com/en/1.1.x/quickstart/
