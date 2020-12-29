@@ -1,5 +1,5 @@
 # dataRep-project2020
-Project Assessment for Data Representation in 2020
+Project Assessment for Data Representation in 2020. The author is Owen Coleman (G00387850@gmit.ie).
 
 http://owenproj2020.pythonanywhere.com/
 <br>
