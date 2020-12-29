@@ -74,6 +74,8 @@
         var optionID = 100;
         //Global correctAnswerList stores correct answer of each question.
         var correctAnswerList = [];
+        //Variable for indexing the questions shown.
+        var qNumber = 0;
 
 
         function readJSON(){
@@ -90,6 +92,7 @@
                     for (question of results){
                         //correct answer of each question passed to correctAnswerList
                         correctAnswerList.push(question.correct_answer);
+                        
                         //Table generator passed each question.
                         showQuestion(question);
                     }
@@ -147,7 +150,7 @@
            //Radio inputs for each answer, ignoring blanks. 
             for (answer of answers){
                 if (answer != ""){
-                    cell2.innerHTML += "<input type='radio' id="+optionID+" name="+question.id+" value='"+ answer+ "'> <label for="+optionID+">"+answer+"</label> <br>";
+                    cell2.innerHTML += "<input type='radio' id="+optionID+" name="+qNumber+" value='"+ answer+ "'> <label for="+optionID+">"+answer+"</label> <br>";
                     optionID++;
                 }
             }
@@ -157,16 +160,17 @@
             cell1 = rowElem.insertCell(0);
             cell1.setAttribute("colspan", 5)
             cell1.setAttribute("style","background-color: #dce2eb; border: 0px solid transparent;")
-
+            qNumber++;
 
         }
         
         //Function for checking the values selected by the user
         function checkUserAnswer(){
-            document.getElementById("errorTag").innerHTML = "";
-            for (id of ids){
-                choice=document.querySelector('input[name="'+id+'"]:checked');
-                allchoices=document.getElementsByName(id);
+            //console.log("start of function")
+            for (i = 0; i < qNumber; i++) {
+                choice=document.querySelector('input[name="'+i+'"]:checked');
+                allchoices=document.getElementsByName(i);
+                //if no values are entered for a question, throw error
                 if((choice == null) || (allchoices == null)){
                     errormsg = document.getElementById("errorTag")
                     errormsg.setAttribute("style","color:red; margin: 15px 15px 15px 15px; ")
@@ -175,47 +179,44 @@
                     document.documentElement.scrollTop = 0;
                     return;
                 }
-                check(choice,allchoices);
-                //call of showScore()
-                showScore(ids);
+                check(choice,allchoices,i);
+                showScore();
             }
         }
 
-        function check(choice, allchoices){
+        function check(choice, allchoices,i){
+            console.log("start of check()")
+            console.log(choice.value)
+            console.log(correctAnswerList[i])
+            console.log(choice.value === correctAnswerList[i])
             
-            //if users choice is correct, highlight green
-            if (correctAnswerList.includes(choice.value)){
+            if (choice.value === correctAnswerList[i]){
                 label=document.getElementById(choice.id).nextElementSibling;
                 label.setAttribute("style","border-style: solid; border-color: green;");
-                score++; //score + 1
+                score++; 
                 return;
             }
-            //if incorrect, highlight red
             else{
                 label=document.getElementById(choice.id).nextElementSibling;
                 label.setAttribute("style","border-style: solid; border-color: red;")
             }
-            //if incorrect, show the correct answer in dotted green.
             for (j of allchoices){
-                if (correctAnswerList.includes(j.value)){
+                if (j.value ==correctAnswerList[i]){
                     label=document.getElementById(j.id).nextElementSibling;
                     label.setAttribute("style","border-style: dotted; border-color: green;")
                 }
             }
 
         }
-
         //Displays the gotten score at the top of the page.
         function showScore(){
             document.getElementById('score').style.display = "block";
-            document.getElementById('score').innerHTML="<h3> You got "+score+"/"+correctAnswerList.length+"</h3>"
+            document.getElementById('score').innerHTML="<h3> You got "+score+"/"+qNumber+"</h3>"
             document.getElementById('submitQuiz').style.display = "none";
             document.body.scrollTop = 0;
             document.documentElement.scrollTop = 0;
+
         }
-
-
-
         //function called on page load. 
         readJSON();
 

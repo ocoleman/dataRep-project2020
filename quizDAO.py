@@ -93,7 +93,7 @@ class QuizDAO:
     #Find a question by id
     def findById(self, id):
         cursor = self.getCursor()
-        sql="select * from questions where id = %s"
+        sql="select * from questions where id in (%s)"
         values = (id,)
 
         cursor.execute(sql, values)
