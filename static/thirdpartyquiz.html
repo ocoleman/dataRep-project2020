@@ -48,6 +48,9 @@
 
         <div id="score" style="display: none; width: 200px; margin: 15px 15px 15px 15px; border: solid; border-color: #5e7aaf;; border-radius: 25px; padding: 10px; ">
         </div>
+
+        <div id="errorTag"></div>
+
         <!-- Quiz Options form, allows user to select options for generated quiz -->
         <div id="quizMenu" style="width: 1000px; margin: 15px 15px 15px 15px; display: block;">
             <form name="quizOptions" onsubmit="validate(); return false;">
@@ -254,6 +257,15 @@
             for (i = 1; i <= globalQuantity; i++) {
                 choice=document.querySelector('input[name="'+i+'"]:checked');
                 allchoices=document.getElementsByName(i);
+                //if no values are entered for a question, throw error
+                if((choice == null) || (allchoices == null)){
+                    errormsg = document.getElementById("errorTag")
+                    errormsg.setAttribute("style","color:red; margin: 15px 15px 15px 15px; ")
+                    errormsg.innerHTML="Error: One or more questions were not answered."
+                    document.body.scrollTop = 0;
+                    document.documentElement.scrollTop = 0;
+                    return;
+                }
                 check(choice,allchoices,i);
                 //call of showScore()
                 showScore();
